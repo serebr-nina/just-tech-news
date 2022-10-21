@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { User, Post, Vote } = require('../../models');
+const { User, Post, Comment, Vote } = require('../../models');
 
 router.get('/', (req, res) => {
     User.findAll({
@@ -24,6 +24,14 @@ router.get('/:id', (req, res) => {
                 attributes: ['id', 'title', 'post_url', 'created_at']
             },
             {
+                model: Comment,
+                attributes: ['id', 'comment_text', 'created_at'],
+                include: {
+                    model: Post,
+                    attributes: ['title']
+                }
+            },
+            {
                 model: Post,
                 attributes: ['title'],
                 through: Vote,
@@ -45,7 +53,7 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-      // expects {username: '...', email: '...@gmail.com', password: '...'}
+    // expects {username: '...', email: '...@gmail.com', password: '...'}
     User.create({
         username: req.body.username,
         email: req.body.email,
@@ -78,9 +86,9 @@ router.post('/login', (req, res) => {
 });
 
 router.put('/:id', (req, res) => {
-      // expects {username: '...', email: '...', password: '...'}
-      
-      // pass in req.body to only update what's passed through
+    // expects {username: '...', email: '...', password: '...'}
+
+    // pass in req.body to only update what's passed through
     User.update(req.body, {
         individualHooks: true,
         where: {
